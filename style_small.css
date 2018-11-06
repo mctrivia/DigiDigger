@@ -1,0 +1,53 @@
+#top {
+	height:			20px;
+	font-size:		16px;
+}
+#fund {
+	right:			0px;
+	top:			20px;
+	background-color:#ffffff;
+	z-index:		999997;
+}
+#search {
+	top:			20px;
+	left: 			50%;
+	transform: 		translate(-50%, 0);
+}
+#fund input{
+	width:			100%;	
+}
+#fund select{
+	width:			100%;	
+}
+#openMenu{
+	position:		fixed;
+	right:			0px;
+	top:			0px;
+	height:			20px;
+	display:		block;	
+}
+#info{
+	position:		fixed;
+	left:			0px;
+	right:			0px;
+	top:			532;
+	bottom:			0px;
+	font-size:		12px;
+}
+.infoPart{
+	position:		relative;
+	float:			left;
+	width:			33%;
+	text-align:		center;
+}
+#infoWinner{
+	position:		relative;
+	clear:			both;
+	float:			left;
+	text-align:		center;
+	width:			100%;
+	font-size:		14px;
+}
+#window_graph{
+	width:			98%;
+}

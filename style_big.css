@@ -1,0 +1,27 @@
+#top {
+	height:			44px;
+	font-size:		38px;
+}
+#fund {
+	width:			300px;
+	top:			44px;
+}
+#search {
+	left:			300px;
+	top:			44px;
+}
+#fund input{
+	width:			290px;	
+}
+#fund select{
+	width:			290px;	
+}
+#openMenu{
+	display:		none;
+}
+#info{
+	display:		none;
+}
+#window_graph{
+	width:			90%;
+}

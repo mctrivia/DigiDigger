@@ -1,0 +1,79 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DigiDig</title>
+</head>
+
+<body>
+	<link rel="stylesheet" type="text/css" href="chartist.min.css">
+	<link rel="stylesheet" type="text/css" href="style.css">
+	<link rel="stylesheet" type="text/css" media="screen and (min-width: 811px)" href="style_big.css">
+	<link rel="stylesheet" type="text/css" media="screen and (max-width: 800px)" href="style_small.css">
+
+	<div id="top">DigiDigger - Pot: <span id="pot">Loading</span>**</div>
+	<button id="openMenu">Menu</button>
+	<img id="search" src="dig.png">
+	<div id="fund">
+		<button id="closeMenu">Play Game</button>
+		<h3>Guesses Left:</h3>
+		<span id="guess">0</span> <button id="addFunds">Buy</button><br>
+		<h3>Winnings:</h3>
+		<span id="win">0.00000000</span>DGB<br>
+		<h3>Payout Wallet:</h3>
+		<input type="text" id="wallet" value=""><br>
+		<h3>Instructions:</h3>
+		Enter a DigiByte address in the payout box.  Add some funds to the game and then start guessing where in the picture the funds are hidden.  If you find any they will be sent to the address provided.<br>When you add funds they are randomly scatered over the image.  Every minute funds move to new locations.
+		
+		<h3>Notes:</h3>
+		*Warning closing app will lose outstanding guesses<br>
+		**Pot total updated every 5min.
+		
+	</div>
+	<div id="info">
+		<div class="infoPart oddsLink">Odds: <span id="infoOdds">Loading</span></div>
+		<div class="infoPart">Pot: <span id="infoPot">Loading</span></div>
+		<div class="infoPart">Jackpot: <span id="infoBig">Loading</span></div>
+		<div id="infoWinner">Winnings: <span id="infoWin">0.00000000</span></div>
+	</div>
+	<img id="sprite" src="sprite32.png">
+</div>
+
+
+<div id="shadow"></div>
+
+<div id="window_loading" class="window">
+	Loading
+</div>
+
+<div id="window_setWallet" class="window">
+Please set payout wallet address.<br>
+<button class="close">Close</button><br>&nbsp;
+</div>
+
+<div id="window_buy" class="window">
+<h1>Send DigiByte to:</h1>
+<img id="fundAddress"><br>
+<span id="payAddress"></span><br>
+You will receive 1 dig per DigiByte sent.<br>
+<span class="oddsLink">Click for Odds of Winning</span><br>
+<button class="close">Close(Will auto close when funds received)</button><br>&nbsp;
+</div>
+
+<div id="window_graph" class="window">
+<h1>Odds:</h1>
+<div id="oddsGraph"></div>
+<button class="close">Close</button><br>&nbsp;
+</div>
+
+
+<div id="window_error" class="window">
+<h1>Error:</h1>
+<span id="errorMessage"></span><br>
+<input id="errorClose" type="button" class="close" value="OK">
+</div>
+
+<script src="libraries.min.js"></script>
+<script src="main.js"></script>
+
+</body>
+</html>

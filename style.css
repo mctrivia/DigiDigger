@@ -1,0 +1,94 @@
+body {
+	margin:			0px;
+}
+h1 {
+	margin-bottom:	2px;
+}
+
+.oddsLink{
+	cursor:			pointer;
+	color:			blue;
+}
+
+#closeWindow {
+	display:		none;
+}
+
+#top {
+	position:		fixed;
+	left:			0px;
+	top:			0px;
+	right:			0px;
+	text-align:		center;
+	background-color:#cccccc;
+}
+#fund {
+	position:		fixed;
+	left:			0px;
+	bottom:			0px;	
+	padding:		5px;
+}
+#fund h3 {
+	margin-bottom:	0px;
+}
+#fundAddress{
+	margin:			10px;
+	background-color:#ffffff;	
+}
+#closeMenu{
+	display:		none;
+	width:			100%;
+}
+#wallet{
+	background-color:#ff3333;
+}
+
+
+#search {
+	position:		fixed;
+	width:			512px;
+	height:			512px;
+	cursor:			pointer;
+}
+
+#sprite {
+	display:		none;
+}	
+	
+#shadow {
+	position:			fixed;
+	padding:			0;
+	margin:				0;
+
+	top:				0;
+	left:				0;
+
+	width: 				100%;
+	height: 			100%;
+	background:			rgba(0,0,0,0.5);
+	display: 			block;
+	z-index:			999999;
+}
+.window {
+	text-align:			center;
+	margin: 			0;
+	padding:			5px;
+	position: 			fixed;  
+	top: 				50%;
+	left: 				50%;
+	transform: 			translate(-50%, -50%);
+	display: 			none;	
+	
+	background-color: 	white;	
+	border-radius:		2px;
+	box-shadow:			0 0 15px;
+	font-size:			14px;
+	font-weight:		bold;
+	background-color: 	#ffffff;
+	z-index: 			1000000;
+}
+
+#window_loading {
+	display:			block;
+	font-size:			50px;
+}
