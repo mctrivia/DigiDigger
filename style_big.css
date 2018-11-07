@@ -7,14 +7,14 @@
 	top:			44px;
 }
 #search {
-	left:			300px;
+	left:			310px;
 	top:			44px;
 }
 #fund input{
-	width:			290px;	
+	width:			300px;	
 }
 #fund select{
-	width:			290px;	
+	width:			300px;	
 }
 #openMenu{
 	display:		none;
@@ -24,4 +24,28 @@
 }
 #window_graph{
 	width:			90%;
+}
+
+
+#info{
+	position:		fixed;
+	left:			0px;
+	right:			0px;
+	top:			556;
+	bottom:			0px;
+	font-size:		14px;
+	display:		block;
+	padding-top:	2px;
+}
+.infoPart{
+	position:		relative;
+	float:			left;
+	width:			25%;
+	text-align:		center;
+}
+#infoWinner{
+	position:		relative;
+	float:			left;
+	text-align:		center;
+	width:			25%;
 }

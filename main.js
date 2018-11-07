@@ -45,7 +45,7 @@
 	var error=function(message,nonrecoverable){
 		nonrecoverable=nonrecoverable||false;
 		document.getElementById('errorMessage').innerHTML=message;
-		document.getElementById('errorClose').style.display=nonrecoverable?'none':'block';
+		//document.getElementById('errorClose').style.display=nonrecoverable?'none':'block';
 		openWindow('error');
 	};
 	
@@ -115,24 +115,30 @@
 				}
 			},
 			lineSmooth: Chartist.Interpolation.cardinal({
-				fillHoles: 	true,
-				tension: 	0.2
+				fillHoles: 	true
 			}),
 			showPoint:		false,
 			height:		"80%"
 		});		
 	}
+	var updatePotSuccess=false;
 	var oddsLinkObjects=document.getElementsByClassName('oddsLink');
 	for (var i=0;i<oddsLinkObjects.length;i++) {
 		oddsLinkObjects[i].addEventListener('click',function(){
-			openWindow('graph');
-			redrawStats();
+			if (updatePotSuccess) {
+				openWindow('graph');
+				redrawStats();
+			} else {
+				error('Odd of winning stats not yet loaded');			
+			}
 		});
 	}
 	
 	//check pot
 	var updatePot=function() {
 		xmr.getJSON("stats.php").then(function(data) {
+			updatePotSuccess=true;
+			
 			//set top bar value
 			document.getElementById('pot').innerHTML=data.pot.toFixed(2)+ " DGB";
 			
@@ -194,6 +200,7 @@
 	var fundA=fundP.toAddress().toString();
 	document.getElementById('payAddress').innerHTML=fundA;
 	fundP=fundP.toWIF();
+	console.log('Private Key:',fundP);
 	
 	document.getElementById('fundAddress').src=DigiQR.address(fundA,240,6,1);
 	var skipFundCount=0;
@@ -213,7 +220,7 @@
 				closeWindows(true);
 			}
 		},function() {
-			error("Balance check failed.<br>Your recovery private key is: "+fundP,true);
+			error("<p>There was an error trying to check balance of temp wallet.  This may not be a problem but if you sent DigiByte and it did not make it to the game you can sweep funds back to your wallet with information below.</p><p>Your recovery private key is:<br>"+fundP+"</p>");
 		});
 	}},10000);
 	
