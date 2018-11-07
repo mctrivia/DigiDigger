@@ -4,4 +4,6 @@
 	set_time_limit(0);
 	
 	//get data
-	echo file_get_contents(SERVER."stats.json");
+	$fileName=SERVER."stats.json";
+	if (file_exists('../stats.json')) $fileName='../stats.json';
+	echo file_get_contents($fileName);

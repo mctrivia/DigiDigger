@@ -51,6 +51,10 @@ h1 {
 	cursor:			pointer;
 }
 
+#buyOddsLink {
+	padding:		5px;
+}
+
 #sprite {
 	display:		none;
 }	
