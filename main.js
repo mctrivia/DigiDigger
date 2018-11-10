@@ -72,8 +72,7 @@
 	xmr.setServer(FOLDER);
 	
 	var oddsData=[];
-	var redrawStats=function() {
-		
+	var redrawStats=function() {	
 		var started=false;
 		var start=false,end=false;
 		var odds=1024;
@@ -85,7 +84,7 @@
 				break;
 			}			
 		}
-		end=Math.floor(i/10)*10;
+		end=Math.ceil(i/10)*10;
 		odds=1024-oddsData[0];
 		var values=[];
 		var labels=[];
@@ -104,7 +103,7 @@
 				divisor:	5,
 				labelInterpolationFnc: function(value) {
 					if (Math.floor(value)!=value) return;
-					return Math.pow(10,value+1)/100000000 + " DGB";
+					return Math.pow(10,value)/100000000 + " DGB";
 				}
 			},
 			axisY: {
@@ -115,7 +114,8 @@
 				}
 			},
 			lineSmooth: Chartist.Interpolation.cardinal({
-				fillHoles: 	true
+				fillHoles: 	true,
+				tension:	0.2
 			}),
 			showPoint:		false,
 			height:		"80%"
@@ -202,7 +202,11 @@
 	fundP=fundP.toWIF();
 	console.log('Private Key:',fundP);
 	
-	document.getElementById('fundAddress').src=DigiQR.address(fundA,240,6,1);
+	var domQR=document.getElementById('fundAddress');
+	domQR.src=DigiQR.request(fundA,1,240,6,1);
+	domQR.addEventListener('click',function() {
+		window.open('digibyte:'+fundA);
+	});
 	var skipFundCount=0;
 	setInterval(function() {if ((fundF)||((!fundF)&&(++skipFundCount==30))) {
 		skipFundCount=0;

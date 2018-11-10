@@ -42,7 +42,9 @@ h1 {
 #wallet{
 	background-color:#ff3333;
 }
-
+#fundAddress{
+	cursor:			pointer;
+}
 
 #search {
 	position:		fixed;

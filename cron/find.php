@@ -46,7 +46,6 @@ foreach ($possible as $address) {
 		$maxAddress=$address;
 	}
 }
-ksort($values);
 
 echo "filled: $filled\npot: $balance\nbig: $max\n";
 file_put_contents(dirname(__DIR__)."/stats.json",json_encode(array(
