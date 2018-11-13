@@ -17,7 +17,7 @@
 	width:			300px;	
 }
 #openMenu{
-	display:		none;
+	display:		none;			/* Checked by script to know in big mode */
 }
 #info{
 	display:		none;

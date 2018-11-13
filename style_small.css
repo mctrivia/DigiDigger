@@ -24,7 +24,7 @@
 	right:			0px;
 	top:			0px;
 	height:			20px;
-	display:		block;	
+	display:		block;			/* Checked by script to know in small mode */	
 }
 #info{
 	position:		fixed;

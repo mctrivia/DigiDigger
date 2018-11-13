@@ -158,36 +158,89 @@
 		});
 	};
 	updatePot();
-	setInterval(updatePot,300000);
+	setInterval(updatePot,300000);														//check pot and stats every 5 min
 	
 	//Monitor Current Payout Address
 	var domOpenMenu=document.getElementById('openMenu');
 	var domCloseMenu=document.getElementById('closeMenu');
 	var domMenu=document.getElementById('fund');
-	var smallScreen=(window.getComputedStyle(domOpenMenu).display!="none");
-	domOpenMenu.style.display="none";
-	var wallet=false;
+	var smallScreen=(window.getComputedStyle(domOpenMenu).display!="none");				//Check if small css file
+	domOpenMenu.style.display="none";													//hide open menu button
+	var wallet=false;																	//set that no valid payout wallet set yet
 	var domWallet=document.getElementById('wallet');
-	domWallet.addEventListener('change',function() {
-		var newAddress=domWallet.value.trim();
-		if (digibyte.Address.isValid(newAddress)) {
-			wallet=newAddress;
-			if (smallScreen) domCloseMenu.style.display="block";
-			domWallet.style.backgroundColor="#ffffff";
+	domWallet.addEventListener('change',function() {									//watch for changes to payout wallet
+		var newAddress=domWallet.value.trim();											//remove any white space from address
+		if (digibyte.Address.isValid(newAddress)) {										//check if valid legacy address
+			wallet=newAddress;															//set payout address
+			if (smallScreen) domCloseMenu.style.display="block";						//if small screen make close menu button visible
+			domWallet.style.backgroundColor="#ffffff";									//set input field background to white
 		} else {
-			wallet=false;
-			domCloseMenu.display="none";
-			domWallet.style.backgroundColor="#ff3333";			
+			wallet=false;																//set that payout wallet is invalid
+			domCloseMenu.display="none";												//hide close menu
+			domWallet.style.backgroundColor="#ff3333";									//set input fields background to light red
 		}
 	});
-	domCloseMenu.addEventListener('click',function() {
-		domMenu.style.display="none";
-		domOpenMenu.style.display="block";
+	domCloseMenu.addEventListener('click',function() {									//listen for close menu click
+		domMenu.style.display="none";													//hide menu
+		domOpenMenu.style.display="block";												//show open menu button
 	});
-	domOpenMenu.addEventListener('click',function() {
-		domMenu.style.display="block";
-		domOpenMenu.style.display="none";
+	domOpenMenu.addEventListener('click',function() {									//listen for open menu click
+		domMenu.style.display="block";													//show menu
+		domOpenMenu.style.display="none";												//hide open menu button
 	});
+	
+	
+	//generate temp wallet
+	var fundP,fundA,
+		brainString="",
+		domQR=document.getElementById('fundAddress');
+	for (var i=0;i<3;i++) {
+		var part=bip39.english[Math.floor(Math.random()*2048)];							//pick a random word from list
+		brainString+=part.charAt(0).toUpperCase()+part.slice(1);						//make first letter upper case and add to string
+	}
+	var domRecovery=document.getElementById('recovery');
+	domRecovery.value=brainString;														//set recovery phrase
+	function makeBrain() {
+		//compute path
+		var hash=bitcoinjs.bitcoin.crypto.sha256(domRecovery.value);					//hash recovery phrase
+		var path="m/13'";																//start path
+		for (var i=0;i<16;i+=4) path+="/"+((hash[i+3]&0x7f)<<24|hash[i+2]<<16|hash[i+1]<<8|hash[i])+"'";//add first 4x 32bit part to path
+		
+		//compute key pair
+		var xprv='xprv9s21ZrQH143K31Jh4aY1efbnvR3nwBPmGesTahvKVdV5r7a4JDLQ5t31taNtq7sN94o6bCdzLYXhehMLjXE5rpmEqysMV8YWiJuNTLombsx';	//set a hd private key to use
+																								//This is random key.  Even though the key is public  
+																								//funds are safe because there are 2^124-1 possible wallet
+																								//and under normal circumstances funds will only be in address
+																								//for less then 1 minute.  Would take centuries to try all
+																								//combinations.
+		var keyPair=bip39.getHDKeyFromXPrv(xprv,path).keyPair;							//generate key pair
+		fundA=keyPair.getAddress("D");													//calculate address
+		fundP=keyPair.toWIF();															//calculate private key
+		
+		//show address
+		domQR.src=DigiQR.request(fundA,1,240,6,1);										//generate qr code
+		document.getElementById('payAddress').innerHTML=fundA;							//show address
+	}
+	makeBrain();																		//generate intial address
+	domRecovery.addEventListener('change',function() {									//wait for change in recovery phrase
+		document.getElementById('payAddress').innerHTML='Please Wait';					//show message to let others know qr is bad
+		setTimeout(makeBrain,10);														//short delay so ui can catch up then make brain wallet
+	});
+	var recoveryDelay=setTimeout(makeBrain,10);											//prevents an error
+	domRecovery.addEventListener('keyup',function() {									//wait for key to be released
+		document.getElementById('payAddress').innerHTML='Please Wait';					//show message to let others know qr is bad
+		clearInterval(recoveryDelay);													//stop the last timer
+		recoveryDelay=setTimeout(makeBrain,500);										//start timer so we dont kill processor while user is typing
+	});
+	domQR.addEventListener('click',function() {											//wait for qr code clicks
+		window.open('digibyte:'+fundA);													//open users wallet
+	});
+	
+	
+	
+	
+	
+	
 	
 	//Monitor Funding
 	var fundF=false;
@@ -196,17 +249,6 @@
 		fundF=true;
 	};
 	document.getElementById('addFunds').addEventListener('click',openFundWindow);
-	var fundP=new digibyte.PrivateKey();
-	var fundA=fundP.toAddress().toString();
-	document.getElementById('payAddress').innerHTML=fundA;
-	fundP=fundP.toWIF();
-	console.log('Private Key:',fundP);
-	
-	var domQR=document.getElementById('fundAddress');
-	domQR.src=DigiQR.request(fundA,1,240,6,1);
-	domQR.addEventListener('click',function() {
-		window.open('digibyte:'+fundA);
-	});
 	var skipFundCount=0;
 	setInterval(function() {if ((fundF)||((!fundF)&&(++skipFundCount==30))) {
 		skipFundCount=0;
@@ -223,8 +265,6 @@
 				//close window
 				closeWindows(true);
 			}
-		},function() {
-			error("<p>There was an error trying to check balance of temp wallet.  This may not be a problem but if you sent DigiByte and it did not make it to the game you can sweep funds back to your wallet with information below.</p><p>Your recovery private key is:<br>"+fundP+"</p>");
 		});
 	}},10000);
 	
