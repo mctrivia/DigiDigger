@@ -133,17 +133,26 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 	
 	var addJSON=function(url,name,type,data) {						//function to deal with json data
 		return new Promise(function(resolve, reject) {					//return promise since execution is asyncronous
-			addRequest(url,name,type,data).then(function(data) {		//make request
+			addRequest(url,name,type,data).then(function(data) {		//make request			
 				try {
 					var decodedJSON=JSON["parse"](data);				//decode returned string into json data
-					if (decodedJSON===null) {							//check if data was valid json data
-						reject("Invalid JSON");							//reject since not not valid json
-					} else {											//data was valid
+				} catch (err) {
+					return reject("Invalid JSON");						//reject since not not valid json
+				}	
+				if (decodedJSON===null) {								//check if data was valid json data
+					return reject("Invalid JSON");						//reject since not not valid json
+				}
+				try {
+					if ((decodedJSON["error"]==undefined) || (decodedJSON["error"]==false)) {//check if no errors
 						resolve(decodedJSON);							//resolve the promise
+					} else {
+						reject(decodedJSON["error"]);					//reject with error message provided
 					}
 				} catch (err) {
-					reject("Invalid JSON");								//reject since not not valid json
-				}
+					console.log('caught');
+					resolve(decodedJSON);								//resolve the promise
+				}				
+				
 			},reject);													//continue reject if request failed
 		});
 	};

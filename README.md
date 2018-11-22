@@ -3,7 +3,7 @@
 DigiDigger is an on chain lottery game played with DigiByte.
 It was designed as a fund raiser fur dgbat.org and 5% of entry price goes directly to there wallet.
 
-Programmers are free to make there own versions of the game or a whole new game using the backend.  You will even get paid for your work if you set the SITE_WALLET value in api/~server.php to your personal DigiByte wallet(only legacy addresses with upper case D prefic supported).
+Programmers are free to make there own versions of the game or a whole new game using the backend.  You will even get paid for your work if you set the SITE value on line 2 of main.js to your personal DigiByte wallet(only addresses starting with D or S supported).
 
 ## How the game works:
 - The game board is made up of a 512x512 grid numbered from 0 to 511.
