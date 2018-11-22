@@ -1,15 +1,16 @@
 (function(undefined) {
-	const FOLDER='api/';
-	const SPRITE_SIZE=32;
-	const SPRITE_HALF=SPRITE_SIZE/2;
-	const SPRITE_TIME=5000;		//minimum time sprite is shown
-	const SPRITE_FINISH=55000;	//time win or lose shows
-	var guessLeft=0;
+	const SITE='DMw9wz6KHsvbvXsmo1Q8BajWcohYwjqwoq';									//game makers wallet
+	const FOLDER='https://digger.digibyte.rocks/';										//api folder location
+	const SPRITE_SIZE=32;																//size of sprite
+	const SPRITE_HALF=SPRITE_SIZE/2;													//half the size of sprite
+	const SPRITE_TIME=5000;																//minimum time sprite is shown
+	const SPRITE_FINISH=55000;															//time win or lose shows
+	var guessLeft=0;																	//initial number of guesses.  Should always be 0 but during testing with fake folder speeds up to change to 100
 	
 
 			
-	const MAX_REQUESTS=4;													//max number of concurent requests to explorer server
-	var digibyte=require('digibyte');										//load digibyte object.  should check digibyte.min.js has not been edited since last confirmation of good standing
+	const MAX_REQUESTS=4;																//max number of concurent requests to explorer server
+	var digibyte=require('digibyte');													//load digibyte object.  should check digibyte.min.js has not been edited since last confirmation of good standing
 	
 	
 	
@@ -25,28 +26,26 @@
 */
 	var domShadow=document['getElementById']('shadow');
 	var closeWindows=function(shadow) {
-		var windows=document['getElementsByClassName']('window');				//get all windows
-		for (var i=0; i<windows['length']; i++) {								//go through each window
-			windows[i]['style']['display']='none';								//make window invisible
+		var windows=document['getElementsByClassName']('window');						//get all windows
+		for (var i=0; i<windows['length']; i++) {										//go through each window
+			windows[i]['style']['display']='none';										//make window invisible
 		}
-		if (shadow===true) domShadow['style']['display']='none';				//close shadow if set
+		if (shadow===true) domShadow['style']['display']='none';						//close shadow if set
 		fundF=false;
 	}
 	var openWindow=function(windowType) {
-		closeWindows();															//close all windows
-		document['getElementById']("window_"+windowType)['style']['display']='block';//open the window associated with button pressed
-		domShadow['style']['display']='block';									//open shadow
+		closeWindows();																	//close all windows
+		document['getElementById']("window_"+windowType)['style']['display']='block';	//open the window associated with button pressed
+		domShadow['style']['display']='block';											//open shadow
 	}
-	var domClose=document.getElementsByClassName("close");				//get all dom items using class next
-	for (var i=0; i<domClose.length; i++) {								//go through each dom element with class "next"
-		domClose[i].addEventListener('click', function() {closeWindows(true)}, false);			//attach click listener to execute closeWindows function
+	var domClose=document.getElementsByClassName("close");								//get all dom items using class next
+	for (var i=0; i<domClose.length; i++) {												//go through each dom element with class "next"
+		domClose[i].addEventListener('click', function() {closeWindows(true)}, false);	//attach click listener to execute closeWindows function
 	}
 	
-	var error=function(message,nonrecoverable){
-		nonrecoverable=nonrecoverable||false;
-		document.getElementById('errorMessage').innerHTML=message;
-		//document.getElementById('errorClose').style.display=nonrecoverable?'none':'block';
-		openWindow('error');
+	var error=function(message){														//error handling function
+		document.getElementById('errorMessage').innerHTML=message;						//set error message
+		openWindow('error');															//show error window
 	};
 	
 	
@@ -68,99 +67,109 @@
 	
 	
 	//Handle requests
-	xmr.setMax(MAX_REQUESTS);
-	xmr.setServer(FOLDER);
-	
-	var oddsData=[];
+	xmr.setMax(MAX_REQUESTS);															//set max number of transactions at a time
+	xmr.setServer(FOLDER);																//set server folder
+
+/* ____      _     _              __  __          ___             _             
+  / __ \    | |   | |            / _| \ \        / (_)           (_)            
+ | |  | | __| | __| |___    ___ | |_   \ \  /\  / / _ _ __  _ __  _ _ __   __ _ 
+ | |  | |/ _` |/ _` / __|  / _ \|  _|   \ \/  \/ / | | '_ \| '_ \| | '_ \ / _` |
+ | |__| | (_| | (_| \__ \ | (_) | |      \  /\  /  | | | | | | | | | | | | (_| |
+  \____/ \__,_|\__,_|___/  \___/|_|       \/  \/   |_|_| |_|_| |_|_|_| |_|\__, |
+                                                                           __/ |
+                                                                          |___/
+*/
+	var oddsData=[];																	//odds data is logarithmic scale.
+																						//number of addresses with at least but not more then next
+																						//[0,10^0.1,10^0.2,10^0.3,10^0.4,...10^(i/10)...] in satoshi
 	var redrawStats=function() {	
-		var started=false;
-		var start=false,end=false;
-		var odds=1024;
-		for (var i in oddsData) {
-			if ((i!=0) && (oddsData[i]>0) && (start===false)) start=Math.floor(i/10)*10;
-			odds-=oddsData[i];
-			if (odds==0) {
-				end=i;
-				break;
+		var start=false,end=false;														//initialise x start and end points
+		var odds=1024;																	//initialize odds to 100%
+		for (var i in oddsData) {														//go through each entry in odds data
+			if ((i!=0) && (oddsData[i]>0) && (start===false)) start=Math.floor(i/10)*10;//find closest power of 10 to lowest non 0 value
+			odds-=oddsData[i];															//keep track of number of wallet with higher values
+			if (odds==0) {																//if we rean out of wallet
+				end=i;																	//record position
+				break;																	//and get out of loop
 			}			
 		}
-		end=Math.ceil(i/10)*10;
-		odds=1024-oddsData[0];
-		var values=[];
-		var labels=[];
-		for (var i=start;i<=end;i++) {
-			odds-=oddsData[i];
-			labels.push(i/10);
-			values.push(((oddsData[i]==0)&&(i!=start))?null:odds/10.24);
+		end=Math.ceil(i/10)*10;															//increase end point to next power of 10
+		odds=1024-oddsData[0];															//calculate number of non 0 addresses
+		var values=[];																	//initialize array for graph values
+		var labels=[];																	//initialize array for graph labels 
+		for (var i=start;i<=end;i++) {													//go through each odds value between start and end
+			odds-=oddsData[i];															//keep track of current odds(y value)
+			labels.push(i/10);															//keep track of current label(log of x value)
+			values.push(((oddsData[i]==0)&&(i!=start))?null:odds/10.24);				//record odds only if real number.  leave null so graph can draw lines as it likes if no addresses there
 		}
-		new Chartist.Line(document.getElementById('oddsGraph'), {
-			series:	[values],
-			labels:	labels
+		new Chartist.Line(document.getElementById('oddsGraph'), {						//create chart
+			series:	[values],															//provide y values
+			labels:	labels																//provide x values 
 		},{
-			fullWidth: true,
-			axisX:	{
-				//type:		Chartist.AutoScaleAxis,
-				divisor:	5,
-				labelInterpolationFnc: function(value) {
-					if (Math.floor(value)!=value) return;
-					return Math.pow(10,value)/100000000 + " DGB";
+			fullWidth: true,															//make graph full width
+			axisX:	{																	//set x axis
+				labelInterpolationFnc: function(value) {								//function to label x axis
+					if (Math.floor(value)!=value) return;								//if not power of 10 don't label
+					return Math.pow(10,value)/100000000 + " DGB";						//label how many DGB log value is equal to
 				}
 			},
-			axisY: {
-				offset: 	40,
-				divisor:	10,		
-				labelInterpolationFnc: function(value) {
-					return value + "%";
+			axisY: {																	//set y axis
+				labelInterpolationFnc: function(value) {								//function to label y values
+					return value + "%";													//add percent symbol to labels
 				}
 			},
-			lineSmooth: Chartist.Interpolation.cardinal({
-				fillHoles: 	true,
-				tension:	0.2
+			lineSmooth: Chartist.Interpolation.cardinal({								//tell chart to smoth arrays
+				fillHoles: 	true,														//fill holes
+				tension:	0.2															//set tension(not sure what value means found in example)
 			}),
-			showPoint:		false,
-			height:		"80%"
+			showPoint:		false,														//don't show points
+			height:			"80%"														//set height to 80% so room for header and close button
 		});		
 	}
-	var updatePotSuccess=false;
-	var oddsLinkObjects=document.getElementsByClassName('oddsLink');
-	for (var i=0;i<oddsLinkObjects.length;i++) {
-		oddsLinkObjects[i].addEventListener('click',function(){
-			if (updatePotSuccess) {
-				openWindow('graph');
-				redrawStats();
+	var updatePotSuccess=false;															//mark that we have not recieved pot yet
+	var oddsLinkObjects=document.getElementsByClassName('oddsLink');					//make list of all objects with class oddsLink
+	for (var i=0;i<oddsLinkObjects.length;i++) {										//go through each .oddsLink object
+		oddsLinkObjects[i].addEventListener('click',function(){							//add click listener
+			if (updatePotSuccess) {														//see if stats have been downloaded
+				openWindow('graph');													//show graph 
+				redrawStats();															//redraw graph
 			} else {
-				error('Odd of winning stats not yet loaded');			
+				error('Odd of winning stats not yet loaded');							//show error message since we don't have stats yet
 			}
 		});
 	}
 	
 	//check pot
 	var updatePot=function() {
-		xmr.getJSON("stats.php").then(function(data) {
-			updatePotSuccess=true;
-			
-			//set top bar value
-			document.getElementById('pot').innerHTML=data.pot.toFixed(2)+ " DGB";
-			
-			//set info bar
-			var odds=0;
-			for (var i in data.odds) {
-				if (i>0) odds+=data.odds[i];
+		xmr.getJSON("stats.json").then(function(data) {									//download stats
+			if (data.pot==0) {															//if pot is 0 insight server has crashed
+				error('Insight Server has Crashed.  Do not play while Pot shows 0.');	//show 0
+			} else {
+				updatePotSuccess=true;													//mark that we have received valid stats data
 			}
-			odds/=10.24;
-			document.getElementById('infoPot').innerHTML=data.pot.toFixed(2)+ " DGB";
-			document.getElementById('infoOdds').innerHTML=odds.toFixed(2)+ "%";
-			document.getElementById('infoBig').innerHTML=data.jackpot.value.toFixed(2)+ " DGB";
-			
-			//set odds graph	
-			oddsData=data.odds;
-			redrawStats();
+			document.getElementById('pot').innerHTML=data.pot.toFixed(2)+ " DGB";		//show pot in top bar
+			var odds=0;																	//initialize count
+			for (var i in data.odds) if (i>0) odds+=data.odds[i];						//count how many addresses  have funds
+			odds/=10.24;																//convert count to percentage
+			document.getElementById('infoPot').innerHTML=data.pot.toFixed(2)+ " DGB";	//show pot in info bar
+			document.getElementById('infoOdds').innerHTML=odds.toFixed(2)+ "%";			//show odds in info bar
+			document.getElementById('infoBig').innerHTML=data.jackpot.value.toFixed(2)+ " DGB";//show jackpot in info bar
+			oddsData=data.odds;															//save odds data
+			redrawStats();																//redraw stats graph
 		});
 	};
-	updatePot();
+	updatePot();																		//check pot imedietly
 	setInterval(updatePot,300000);														//check pot and stats every 5 min
 	
-	//Monitor Current Payout Address
+/*_____                        _                 _     _                   
+ |  __ \                      | |       /\      | |   | |                  
+ | |__) |_ _ _   _  ___  _   _| |_     /  \   __| | __| |_ __ ___  ___ ___ 
+ |  ___/ _` | | | |/ _ \| | | | __|   / /\ \ / _` |/ _` | '__/ _ \/ __/ __|
+ | |  | (_| | |_| | (_) | |_| | |_   / ____ \ (_| | (_| | | |  __/\__ \__ \
+ |_|   \__,_|\__, |\___/ \__,_|\__| /_/    \_\__,_|\__,_|_|  \___||___/___/
+              __/ |                                                        
+             |___/ 
+*/
 	var domOpenMenu=document.getElementById('openMenu');
 	var domCloseMenu=document.getElementById('closeMenu');
 	var domMenu=document.getElementById('fund');
@@ -190,7 +199,15 @@
 	});
 	
 	
-	//generate temp wallet
+/*_____  _              __          __   _ _      _   
+ |  __ \| |             \ \        / /  | | |    | |  
+ | |__) | | __ _ _   _   \ \  /\  / /_ _| | | ___| |_ 
+ |  ___/| |/ _` | | | |   \ \/  \/ / _` | | |/ _ \ __|
+ | |    | | (_| | |_| |    \  /\  / (_| | | |  __/ |_ 
+ |_|    |_|\__,_|\__, |     \/  \/ \__,_|_|_|\___|\__|
+                  __/ |                               
+                 |___/ 
+*/
 	var fundP,fundA,
 		brainString="",
 		domQR=document.getElementById('fundAddress');
@@ -198,7 +215,8 @@
 		var part=bip39.english[Math.floor(Math.random()*2048)];							//pick a random word from list
 		brainString+=part.charAt(0).toUpperCase()+part.slice(1);						//make first letter upper case and add to string
 	}
-	var domRecovery=document.getElementById('recovery');
+	brainString+=Math.floor(Math.random()*999);											//add up to 3 random digits to initial brain string
+	var domRecovery=document.getElementById('recovery');								//get recovery phrase input dom item
 	domRecovery.value=brainString;														//set recovery phrase
 	function makeBrain() {
 		//compute path
@@ -243,17 +261,17 @@
 	
 	
 	//Monitor Funding
-	var fundF=false;
-	var openFundWindow=function() {
-		openWindow('buy');
-		fundF=true;
+	var fundF=false;																	//set high speed fund checking to false
+	var openFundWindow=function() {														//function to open fund window
+		openWindow('buy');																//open fund window
+		fundF=true;																		//set high speed fund checking to true
 	};
-	document.getElementById('addFunds').addEventListener('click',openFundWindow);
-	var skipFundCount=0;
+	document.getElementById('addFunds').addEventListener('click',openFundWindow);		//add click listener to buy button
+	var skipFundCount=0;																//count
 	setInterval(function() {if ((fundF)||((!fundF)&&(++skipFundCount==30))) {
 		skipFundCount=0;
 		fundF=false;
-		xmr.getJSON("fund.php?pkey="+fundP+"&address="+fundA).then(function(guesses) {	
+		xmr.getJSON("balance.php?addr="+fundA).then(function(guesses) {	
 			skipFundCount=0;
 			fundF=true;
 		
@@ -268,7 +286,15 @@
 		});
 	}},10000);
 	
-	//Handle Guesses
+/* _____                        _____  _             
+  / ____|                      |  __ \| |            
+ | |  __  __ _ _ __ ___   ___  | |__) | | __ _ _   _ 
+ | | |_ |/ _` | '_ ` _ \ / _ \ |  ___/| |/ _` | | | |
+ | |__| | (_| | | | | | |  __/ | |    | | (_| | |_| |
+  \_____|\__,_|_| |_| |_|\___| |_|    |_|\__,_|\__, |
+                                                __/ |
+                                               |___/
+*/
 	var win=0;
 	var domSearch=document.getElementById('search');
 	var domSprite=document.getElementById('sprite');
@@ -313,7 +339,9 @@
 						
 
 				//check if won
-				xmr.getJSON("check.php?wallet="+wallet+"&x="+e.offsetX+"&y="+e.offsetY).then(function(amount) {
+				skipFundCount=0;		//prevents balance check causing errors by checking near when game play has happened
+				xmr.getJSON("dig.php?site="+SITE+"&pkey="+fundP+"&addr="+wallet+"&x="+e.offsetX+"&y="+e.offsetY).then(function(amount) {
+					skipFundCount=0;	//prevents balance check causing errors by checking near when game play has happened
 					if (amount>0) {
 						//get balance
 						win+=amount;
@@ -323,6 +351,12 @@
 					} else {
 						done=-1;
 					}
+				},function(data) {
+					//there was an error(probably conflict with other game click)
+					document.getElementById('guess').innerHTML=(++guessLeft);			//on error guess is refunded so show we have one more
+					clearInterval(timer);												//stop the animation
+					document.body.removeChild(sCanvas);									//remove the sprite
+					console.log('error:',data);
 				});
 			} else {
 				openWindow('setWallet');
@@ -332,6 +366,18 @@
 		}
 	},true);
 	
-	//open fund window
-	openFundWindow();
+	
+	
+/*_                     _    _____                      _      _       
+ | |                   | |  / ____|                    | |    | |      
+ | |     ___   __ _  __| | | |     ___  _ __ ___  _ __ | | ___| |_ ___ 
+ | |    / _ \ / _` |/ _` | | |    / _ \| '_ ` _ \| '_ \| |/ _ \ __/ _ \
+ | |___| (_) | (_| | (_| | | |___| (_) | | | | | | |_) | |  __/ ||  __/
+ |______\___/ \__,_|\__,_|  \_____\___/|_| |_| |_| .__/|_|\___|\__\___|
+                                                 | |                   
+                                                 |_|
+*/
+	openFundWindow();																	//Open fund window
+	
+	
 })();

@@ -1,6 +1,7 @@
 <?php
-	session_start();
-	require_once('~server.php');
+	
+	define('SERVER','https://digger.digibyte.rocks/');
+	
 	ignore_user_abort(true);
 	set_time_limit(0);
 	
@@ -38,12 +39,7 @@
 	$address=$_GET['wallet'];	
 	
 	//get data
-	$ch=curl_init(SERVER."stats.json");
-	curl_setopt($ch,CURLOPT_RETURNTRANSFER,true);
-	curl_setopt($ch,CURLOPT_USERAGENT,$_SERVER['HTTP_USER_AGENT']);
-	curl_setopt($ch,CURLOPT_COOKIE,"PHPSESSID={$_COOKIE['PHPSESSID']}; path=/");
-	$data=json_decode(curl_exec($ch),true);
-	curl_close($ch);
+	$data=json_decode(file_get_contents(SERVER."stats.json"),true);
 	
 	$odds=$data['odds'];
 	$index=-1;

@@ -1,0 +1,13 @@
+V1.1 calls:
+
+balance.php?
+	addr={Valid DigiByte Address}
+returns integer number of guesses available using this address
+
+dig.php?
+	pkey={Private Key in WIF format}&
+	addr={Valid DigiByte Address Winning Funds should be sent to}&
+	x={Integer between 0 and 511 inclusive}&
+	y={Integer between 0 and 511 inclusive}&
+	site={Valid DigiByte Address game host should get paid to}
+returns float value of winnings.  If loss returns 0
